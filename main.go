@@ -33,6 +33,7 @@ func main() {
 			fmt.Println("1) Connect to server")
 			fmt.Println("2) Add a new server")
 			fmt.Println("3) Remove old server")
+			fmt.Println("4) Add private key")
 			fmt.Print("> ")
 
 			// Capture user input
@@ -148,6 +149,13 @@ func main() {
 				remove_server(option)
 				fmt.Println("Removed server")
 
+			case 4:
+				fmt.Println("Adding a new private key")
+
+				fmt.Print("Path to private key:\n>")
+				keyPath := new_scanner().Text()
+				add_private_key(keyPath)
+
 			}
 
 			return nil
@@ -158,18 +166,34 @@ func main() {
 		log.Fatal(err)
 	}
 }
+func add_private_key(keyPath string) {
+	command := "ssh-add"
+	args := []string{keyPath}
+	cmd := exec.Command(command, args...)
+
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	// Run the command
+	err := cmd.Run()
+	if err != nil {
+		log.Fatalf("Command execution failed: %v", err)
+	}
+
+	fmt.Println("\nKey added.")
+
+}
 func execute_command(server Server) {
-	command := "ssh"
+	command := "sshpass"
 	var args []string
+	if server.Password != "" {
+		args = append(args, "-p", server.Password)
+	}
+	args = append(args, "ssh")
 
 	if server.IdentityFilePath != "" {
 		args = append(args, "-i", server.IdentityFilePath)
-	}
-	if server.IdentityPassphrase != "" {
-		fmt.Println("Identity passphrase: ", server.IdentityPassphrase)
-	}
-	if server.Password != "" {
-		fmt.Println("Password: ", server.Password)
 	}
 	args = append(args, fmt.Sprintf("%s@%s", server.Username, server.IP))
 	if (server.Port != 0) && (server.Port != 22) {
