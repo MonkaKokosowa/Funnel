@@ -171,7 +171,10 @@ func execute_command(server Server) {
 	if server.Password != "" {
 		fmt.Println("Password: ", server.Password)
 	}
-	args = append(args, fmt.Sprintf("%s@%s:%d", server.Username, server.IP, server.Port))
+	args = append(args, fmt.Sprintf("%s@%s", server.Username, server.IP))
+	if (server.Port != 0) && (server.Port != 22) {
+		args = append(args, "-p", strconv.Itoa(server.Port))
+	}
 	fmt.Println(command, args)
 
 	cmd := exec.Command(command, args...)
