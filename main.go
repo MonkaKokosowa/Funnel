@@ -14,13 +14,11 @@ import (
 )
 
 type Server struct {
-	Name               string "json: name"
-	IP                 string "json: ip"
-	Port               int    "json: port"
-	Username           string "json: username"
-	IdentityFilePath   string "json: identityFilePath"
-	IdentityPassphrase string "json: identityPassphrase"
-	Password           string "json: password"
+	Name     string "json: name"
+	IP       string "json: ip"
+	Port     int    "json: port"
+	Username string "json: username"
+	Password string "json: password"
 }
 
 func main() {
@@ -90,20 +88,6 @@ func main() {
 				fmt.Print("Username:\n> ")
 				username := new_scanner().Text()
 
-				fmt.Print("Identity file path (absolute, empty for none):\n> ")
-				identityFilePath := new_scanner().Text()
-
-				fmt.Print("Identity passphrase (empty for none):\n> ")
-				identityPassphrase := new_scanner().Text()
-
-				if identityPassphrase != "" {
-					fmt.Print("Identity passphrase again:\n> ")
-					if identityPassphrase != new_scanner().Text() {
-						log.Fatal("Passphrases do not match")
-
-					}
-				}
-
 				fmt.Print("Password (empty for none):\n> ")
 				password := new_scanner().Text()
 
@@ -115,17 +99,13 @@ func main() {
 					}
 				}
 				server := Server{
-					Name:               name,
-					IP:                 ip,
-					Port:               port,
-					Username:           username,
-					IdentityFilePath:   identityFilePath,
-					IdentityPassphrase: identityPassphrase,
-					Password:           password,
+					Name:     name,
+					IP:       ip,
+					Port:     port,
+					Username: username,
+					Password: password,
 				}
 				add_server(server)
-
-				fmt.Println(get_servers())
 
 			case 3:
 				if len(get_servers()) == 0 {
@@ -192,14 +172,10 @@ func execute_command(server Server) {
 	}
 	args = append(args, "ssh")
 
-	if server.IdentityFilePath != "" {
-		args = append(args, "-i", server.IdentityFilePath)
-	}
 	args = append(args, fmt.Sprintf("%s@%s", server.Username, server.IP))
 	if (server.Port != 0) && (server.Port != 22) {
 		args = append(args, "-p", strconv.Itoa(server.Port))
 	}
-	fmt.Println(command, args)
 
 	cmd := exec.Command(command, args...)
 
@@ -314,7 +290,7 @@ func add_server(server Server) {
 		if err != nil {
 			log.Fatalf("Error marshalling JSON: %v", err)
 		}
-		fmt.Println("upadtedContent ", updatedContent)
+
 		err = os.WriteFile(filePath, updatedContent, 0644)
 		if err != nil {
 			log.Fatalf("Error writing to file: %v", err)
